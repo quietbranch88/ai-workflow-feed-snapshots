@@ -13,19 +13,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout collector
+      # The data repository retains its own checkout credentials for the
+      # data-branch push. No article text is used as code or a shell command.
+      - name: Checkout snapshot repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
+          path: snapshot-repo
+      # Pin a reviewed public MCP commit containing the collector and lockfile.
+      # Never choose executable code from collected article metadata.
+      - name: Checkout pinned collector
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          repository: quietbranch88/ai-workflow-feed-mcp
+          ref: '74b184bd74a4beda28deef621ccc71b81489cb8f'
+          path: collector
+          persist-credentials: false
       - name: Install pinned dependencies
+        working-directory: collector
         run: npm ci --ignore-scripts
       - name: Collect and update data branch
         shell: bash
         run: |
           set -euo pipefail
+          cd snapshot-repo
           git fetch origin refs/heads/data:refs/remotes/origin/data
           git show origin/data:snapshot.json > "$RUNNER_TEMP/previous-snapshot.json"
-          node scripts/collect-snapshot.mjs "$RUNNER_TEMP/previous-snapshot.json" "$RUNNER_TEMP/new-snapshot.json"
+          node "$GITHUB_WORKSPACE/collector/scripts/collect-snapshot.mjs" "$RUNNER_TEMP/previous-snapshot.json" "$RUNNER_TEMP/new-snapshot.json"
           git worktree add "$RUNNER_TEMP/data-branch" -b data origin/data
           cp "$RUNNER_TEMP/new-snapshot.json" "$RUNNER_TEMP/data-branch/snapshot.json"
           cd "$RUNNER_TEMP/data-branch"
