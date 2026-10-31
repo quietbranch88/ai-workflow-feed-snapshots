@@ -1,0 +1,38 @@
+name: Collect public source snapshot
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: daily-source-snapshot
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout collector
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - name: Install pinned dependencies
+        run: npm ci --ignore-scripts
+      - name: Collect and update data branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/data:refs/remotes/origin/data
+          git show origin/data:snapshot.json > "$RUNNER_TEMP/previous-snapshot.json"
+          node scripts/collect-snapshot.mjs "$RUNNER_TEMP/previous-snapshot.json" "$RUNNER_TEMP/new-snapshot.json"
+          git worktree add "$RUNNER_TEMP/data-branch" -b data origin/data
+          cp "$RUNNER_TEMP/new-snapshot.json" "$RUNNER_TEMP/data-branch/snapshot.json"
+          cd "$RUNNER_TEMP/data-branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add snapshot.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update public source snapshot'
+            git push origin HEAD:refs/heads/data
+          fi
