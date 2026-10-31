@@ -11,7 +11,7 @@ const SOURCES = [
   { id: 'codesai', url: 'https://codesai.com/publications/', provenance: 'official article directory; format may change' },
   { id: 'claudecommunity', url: 'https://www.claudecommunity.com/zh-TW/lab', provenance: 'public community article directory; format may change' },
   { id: 'langfuse', url: 'https://langfuse.com/blog', provenance: 'official article directory; format may change' },
-  { id: 'deepset', url: 'https://haystack.deepset.ai/blog/', provenance: 'official article directory; format may change' },
+  { id: 'deepset', url: 'https://haystack.deepset.ai/blog', provenance: 'official article directory; format may change' },
   { id: 'jina', url: 'https://jina.ai/news/', provenance: 'official article directory; format may change' }
 ];
 export const SNAPSHOT_URL = 'https://raw.githubusercontent.com/quietbranch88/ai-workflow-feed-snapshots/data/snapshot.json';
