@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           repository: quietbranch88/ai-workflow-feed-mcp
-          ref: 'a49cc18c2ab9fcffe2d6e5b2b1ac28b65e9c1e89'
+          ref: '911a9232ff5ecbc5d081384d4bc930de2ed73a3c'
           path: collector
           persist-credentials: false
       - name: Install pinned dependencies
